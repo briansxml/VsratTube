@@ -13,81 +13,8 @@
     <link rel="icon" href="/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
     <link rel="icon" href="/assets/img/favicons/favicon.ico">
 
+
     <style>
-        :root {
-            --orange-color: #fd7e14;
-            --light-bg: #ffffff;
-            --dark-bg: #000000;
-        }
-
-        [data-bs-theme="light"] {
-            --theme-bg: var(--light-bg);
-            --theme-text: #212529;
-            --theme-border: #dee2e6;
-            --theme-primary: var(--orange-color);
-        }
-
-        [data-bs-theme="dark"] {
-            --theme-bg: var(--dark-bg);
-            --theme-text: #f8f9fa;
-            --theme-border: #495057;
-            --theme-primary: var(--orange-color);
-        }
-
-        body {
-            background-color: var(--theme-bg);
-            color: var(--theme-text);
-        }
-
-        .border-bottom {
-            border-bottom-color: var(--theme-border) !important;
-        }
-
-        .btn-primary {
-            --bs-btn-bg: var(--theme-primary);
-            --bs-btn-border-color: var(--theme-primary);
-            --bs-btn-hover-bg: #e06c00;
-            --bs-btn-hover-border-color: #d16600;
-            --bs-btn-active-bg: #c46100;
-            --bs-btn-active-border-color: #b95c00;
-        }
-
-        .bd-mode-toggle {
-            z-index: 1500;
-        }
-
-        .bd-mode-toggle .dropdown-menu {
-            padding: 0.25rem 0;
-            min-width: 10rem;
-        }
-
-        .bd-mode-toggle .dropdown-item {
-            padding: 0.25rem 1rem;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .bd-mode-toggle .btn {
-            padding: 0.25rem;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .bd-mode-toggle .bi {
-            width: 1em;
-            height: 1em;
-            transition: opacity 0.15s ease;
-        }
-
-        .bd-mode-toggle .dropdown-menu .active .bi {
-            display: block !important;
-        }
-
         .bd-placeholder-img {
             font-size: 1.125rem;
             text-anchor: middle;
@@ -156,11 +83,23 @@
             --bs-btn-active-bg: #5a23c8;
             --bs-btn-active-border-color: #5a23c8;
         }
+
+        .bd-mode-toggle {
+            z-index: 1500;
+        }
+
+        .bd-mode-toggle .bi {
+            width: 1em;
+            height: 1em;
+        }
+
+        .bd-mode-toggle .dropdown-menu .active .bi {
+            display: block !important;
+        }
     </style>
 
-
+    <!-- Custom styles for this template -->
     <link href="/static/css/headers.css" rel="stylesheet">
-    <link rel="shortcut icon" href="/static/img/main_logo.ico" type="image/x-icon">
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
@@ -180,46 +119,51 @@
 </svg>
 
 <div class="dropdown position-fixed bottom-0 end-0 mb-3 me-3 bd-mode-toggle">
-    <button class="btn btn-sm btn-bd-primary p-1 dropdown-toggle d-flex align-items-center"
+    <button class="btn btn-bd-primary py-2 dropdown-toggle d-flex align-items-center"
             id="bd-theme"
             type="button"
             aria-expanded="false"
             data-bs-toggle="dropdown"
-            aria-label="Toggle theme">
-        <svg class="bi my-1 theme-icon-active" width="16" height="16">
+
+            aria-label="Toggle theme (auto)">
+        <svg class="bi my-1 theme-icon-active" aria-hidden="true">
             <use href="#circle-half"></use>
         </svg>
+        <span class="visually-hidden" id="bd-theme-text">Toggle theme</span>
     </button>
-    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="bd-theme">
+    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="bd-theme-text">
         <li>
-            <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light">
-                <svg class="bi me-2 opacity-50" width="16" height="16">
+            <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light"
+                    aria-pressed="false">
+                <svg class="bi me-2 opacity-50" aria-hidden="true">
                     <use href="#sun-fill"></use>
                 </svg>
                 Light
-                <svg class="bi ms-auto d-none">
+                <svg class="bi ms-auto d-none" aria-hidden="true">
                     <use href="#check2"></use>
                 </svg>
             </button>
         </li>
         <li>
-            <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark">
-                <svg class="bi me-2 opacity-50" width="16" height="16">
+            <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark"
+                    aria-pressed="false">
+                <svg class="bi me-2 opacity-50" aria-hidden="true">
                     <use href="#moon-stars-fill"></use>
                 </svg>
                 Dark
-                <svg class="bi ms-auto d-none">
+                <svg class="bi ms-auto d-none" aria-hidden="true">
                     <use href="#check2"></use>
                 </svg>
             </button>
         </li>
         <li>
-            <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto">
-                <svg class="bi me-2 opacity-50" width="16" height="16">
+            <button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto"
+                    aria-pressed="true">
+                <svg class="bi me-2 opacity-50" aria-hidden="true">
                     <use href="#circle-half"></use>
                 </svg>
                 Auto
-                <svg class="bi ms-auto d-none">
+                <svg class="bi ms-auto d-none" aria-hidden="true">
                     <use href="#check2"></use>
                 </svg>
             </button>
@@ -254,10 +198,9 @@
                     <img src="/static/img/no_avatar.jpeg" alt="mdo" width="32" height="32" class="rounded-circle">
                 </a>
                 <ul class="dropdown-menu text-small shadow">
-                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">Регистрация</a>
-                    </li>
-                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Войти</a>
-                    </li>
+                    <li><a class="dropdown-item" href="#">New project...</a></li>
+                    <li><a class="dropdown-item" href="#">Settings</a></li>
+                    <li><a class="dropdown-item" href="#">Profile</a></li>
                     <li>
                         <hr class="dropdown-divider">
                     </li>
@@ -270,84 +213,6 @@
     <div class="b-example-divider"></div>
     {% block content %}{% endblock %}
 </main>
-
-
-<div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="registerModalLabel">Регистрация</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="registerForm">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Имя пользователя</label>
-                        <input type="text" class="form-control" id="username" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Пароль</label>
-                        <input type="password" class="form-control" id="password" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="confirmPassword" class="form-label">Подтвердите пароль</label>
-                        <input type="password" class="form-control" id="confirmPassword" required>
-                    </div>
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="agreeTerms" required>
-                        <label class="form-check-label" for="agreeTerms">
-                            Я согласен с условиями использования
-                        </label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                <button type="submit" form="registerForm" class="btn btn-primary">Зарегистрироваться</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="loginModalLabel">Вход в аккаунт</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="loginForm">
-                    <div class="mb-3">
-                        <label for="loginEmail" class="form-label">Email или имя пользователя</label>
-                        <input type="text" class="form-control" id="loginEmail" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="loginPassword" class="form-label">Пароль</label>
-                        <input type="password" class="form-control" id="loginPassword" required>
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="rememberMe">
-                        <label class="form-check-label" for="rememberMe">Запомнить меня</label>
-                    </div>
-                    <div class="mb-3 text-end">
-                        <a href="#" class="text-decoration-none">Забыли пароль?</a>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                <button type="submit" form="loginForm" class="btn btn-primary">Войти</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script defer src="/static/js/bootstrap.bundle.min.js"
         integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"></script>
 

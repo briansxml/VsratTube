@@ -14,7 +14,17 @@ def search():
     searched = request.args.get('q')
     if searched:
         return render_template('search.html', search_str=searched, title=searched)
-    return redirect("/ ")
+    return redirect("/")
+
+
+@app.route('/channel')
+def channel():
+    return render_template('channel.html', title='ChannelName')
+
+
+@app.route('/video')
+def video():
+    return render_template('video.html', title='VideoName')
 
 
 if __name__ == '__main__':
