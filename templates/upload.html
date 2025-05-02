@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Добавить новое видео</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Название видео</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Описание</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="videoFile" class="form-label">Видео файл</label>
+                            <input class="form-control" type="file" id="videoFile" name="video" accept="video/*" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="preview" class="form-label">Превью (необязательно)</label>
+                            <input class="form-control" type="file" id="preview" name="preview" accept="image/*">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Загрузить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <img src="{{ user.avatar or '/static/img/no_avatar.jpeg' }}" class="rounded-circle mb-3" width="150"
+                         height="150">
+                    <h4>{{ user.username }}</h4>
+                    <p class="text-muted">{{ user.email }}</p>
+                    <button class="btn btn-primary btn-sm">Редактировать профиль</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Мои видео</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-1 row-cols-md-3 g-4">
+                        {% for video in user.videos %}
+                        <div class="col">
+                            <div class="card h-100">
+                                <img src="{{ video.preview or '/static/img/preview.png' }}" class="card-img-top"
+                                     alt="превью">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ video.title }}</h5>
+                                    <p class="card-text text-muted">{{ video.views }} просмотров</p>
+                                </div>
+                                <div class="card-footer">
+                                    <small class="text-muted">{{ video.upload_date }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
