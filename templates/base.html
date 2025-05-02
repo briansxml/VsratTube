@@ -158,7 +158,6 @@
         }
     </style>
 
-
     <link href="/static/css/headers.css" rel="stylesheet">
     <link rel="shortcut icon" href="/static/img/main_logo.ico" type="image/x-icon">
 </head>
@@ -249,25 +248,47 @@
             </div>
 
             <div class="flex-shrink-0 me-2 dropdown">
-                <a href="#" class="d-block text-end link-body-emphasis text-decoration-none dropdown-toggle"
-                   data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="/static/img/no_avatar.jpeg" alt="mdo" width="32" height="32" class="rounded-circle">
-                </a>
-                <ul class="dropdown-menu text-small shadow">
-                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">Регистрация</a>
-                    </li>
-                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Войти</a>
-                    </li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <li><a class="dropdown-item" href="#">Выйти</a></li>
-                </ul>
+                {% if current_user.is_authenticated %}
+                    <a href="#" class="d-block text-end link-body-emphasis text-decoration-none dropdown-toggle"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="{{ current_user.avatar or '/static/img/no_avatar.jpeg' }}" alt="mdo" width="32" height="32" class="rounded-circle">
+                    </a>
+                    <ul class="dropdown-menu text-small shadow">
+                        <li><a class="dropdown-item" href="/profile">Профиль</a></li>
+                        <li><a class="dropdown-item" href="/upload">Добавить видео</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout">Выйти</a></li>
+                    </ul>
+                {% else %}
+                    <a href="#" class="d-block text-end link-body-emphasis text-decoration-none dropdown-toggle"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="/static/img/no_avatar.jpeg" alt="mdo" width="32" height="32" class="rounded-circle">
+                    </a>
+                    <ul class="dropdown-menu text-small shadow">
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">Регистрация</a></li>
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Войти</a></li>
+                    </ul>
+                {% endif %}
             </div>
         </div>
     </header>
 
     <div class="b-example-divider"></div>
+
+    <!-- Flash сообщения -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
     {% block content %}{% endblock %}
 </main>
 
@@ -280,22 +301,22 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="registerForm">
+                <form id="registerForm" method="POST" action="{{ url_for('register') }}">
                     <div class="mb-3">
                         <label for="username" class="form-label">Имя пользователя</label>
-                        <input type="text" class="form-control" id="username" required>
+                        <input type="text" class="form-control" id="username" name="username" required>
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" required>
+                        <input type="email" class="form-control" id="email" name="email" required>
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Пароль</label>
-                        <input type="password" class="form-control" id="password" required>
+                        <input type="password" class="form-control" id="password" name="password" required>
                     </div>
                     <div class="mb-3">
                         <label for="confirmPassword" class="form-label">Подтвердите пароль</label>
-                        <input type="password" class="form-control" id="confirmPassword" required>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
                     </div>
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" id="agreeTerms" required>
@@ -322,17 +343,17 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="loginForm">
+                <form id="loginForm" method="POST" action="{{ url_for('login') }}">
                     <div class="mb-3">
                         <label for="loginEmail" class="form-label">Email или имя пользователя</label>
-                        <input type="text" class="form-control" id="loginEmail" required>
+                        <input type="text" class="form-control" id="loginEmail" name="login" required>
                     </div>
                     <div class="mb-3">
                         <label for="loginPassword" class="form-label">Пароль</label>
-                        <input type="password" class="form-control" id="loginPassword" required>
+                        <input type="password" class="form-control" id="loginPassword" name="password" required>
                     </div>
                     <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="rememberMe">
+                        <input type="checkbox" class="form-check-input" id="rememberMe" name="remember">
                         <label class="form-check-label" for="rememberMe">Запомнить меня</label>
                     </div>
                     <div class="mb-3 text-end">
