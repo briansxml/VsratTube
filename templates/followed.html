@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h5>Мои подписки</h5>
+        </div>
+        <div class="card-body">
+            <div class="row row-cols-5 g-4">
+                {% for user in current_user.followed.all() %}
+                <div class="col">
+                    <div class="card h-100">
+                        <img src="{{ user.avatar }}" class="rounded-circle card-img-top"
+                             alt="аватарка">
+                        <div class="card-body">
+                            <a href="/channel/{{ user.id }}" class="stretched-link"></a>
+                            <h5 class="card-title">{{ user.username }}</h5>
+                            <p class="card-text text-muted">{{ user.followers.all()|length }} подписчик</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+{% endblock %}

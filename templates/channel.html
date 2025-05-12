@@ -1,124 +1,146 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-5">
+<script src="/static/js/channel.js"></script>
+<div class="container mt-4">
     <div class="row">
-        <div class="col text-center">
-            <div class="avatar mb-3">
-                <img src="/static/img/no_avatar.jpeg" alt="mdo" width="128" height="128" class="rounded-circle">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <img src="{{ user.avatar or '/static/img/no_avatar.jpeg' }}" class="rounded-circle mb-3" width="150"
+                         height="150">
+                    <h4>{{ user.username }}</h4>
+                    <div>
+                        <p class="text-muted d-inline" id="subCount">{{ user.followers.all()|length }}</p>
+                        <p class="text-muted"> подписчик</p>
+                    </div>
+                    {% if current_user.is_authenticated and current_user == user %}
+                    <p class="text-muted">{{ user.email }}</p>
+                    <a href="#editModal" class="btn btn-primary" data-bs-toggle="modal">Редактировать профиль</a>
+                    <a href="#editPasswordModal" class="btn btn-danger mt-1" data-bs-toggle="modal">Сменить пароль</a>
+                    {% elif current_user.is_authenticated %}
+                    {% if not user.followers.filter(followers.c.follower_id == current_user.id).all() %}
+                    <button type="button" onclick="changeSubscribe({{ user.id }})" id="subscribeButton"
+                            class="btn btn-danger" data-bs-toggle="button" style="width: 120px;">Подписаться</button>
+                    {% else %}
+                    <button type="button" onclick="changeSubscribe({{ user.id }})" id="subscribeButton"
+                            class="btn btn-danger active" data-bs-toggle="button" style="width: 120px;">Отписаться</button>
+                    {% endif %}
+                    {% else %}
+                    <a href="#loginModal" class="btn btn-danger" data-bs-toggle="modal">Подписаться</a>
+                    {% endif %}
+                </div>
             </div>
-            <h2>ChannelName</h2>
+        </div>
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Последние видео</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-1 row-cols-md-4 g-4">
+                        <div class="col">
+                            <div class="card h-100">
+                                <img src="{{ '/static/img/preview.png' }}" class="card-img-top"
+                                     alt="превью">
+                                <div class="card-body">
+                                    <a href="/video" class="stretched-link"></a>
+                                    <h5 class="card-title">video.title</h5>
+                                    <p class="card-text text-muted">video.likes нравится</p>
+                                </div>
+                                <div class="card-footer">
+                                    <small class="text-muted">video.upload_date</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-<h1 style="padding: 1rem;">Последние видео:</h1>
-<div class="container-fluid">
-    <div class="row mx-auto row-cols-auto g-4">
-        <div class="col">
-            <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="/static/img/preview.png" alt="превью">
-                <div class="card-body">
-                    <h5 class="card-title">VideoNameVideoNameVideoNameVideoNameVideoName</h5>
-                    <p class="card-text">
-                        <a href="/channel" class="stretched-link link-body-emphasis text-decoration-none"
-                           style="position: relative; z-index: 2;">NameChannel</a>
-                    </p>
-                    <a href="/video" class="stretched-link"></a>
-                </div>
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Редактировать профиль</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        </div>
-        <div class="col">
-            <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="/static/img/preview.png" alt="превью">
-                <div class="card-body">
-                    <h5 class="card-title">VideoName</h5>
-                    <p class="card-text">
-                        <a href="/channel" class="stretched-link link-body-emphasis text-decoration-none"
-                           style="position: relative; z-index: 2;">NameChannel</a>
-                    </p>
-                    <a href="/video" class="stretched-link"></a>
-                </div>
+            <div class="modal-body">
+                <form id="editForm" method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editEmail" name="editEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editUsername" class="form-label">Имя пользователя</label>
+                        <input type="text" class="form-control" id="editUsername" name="editUsername" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editAvatar" class="form-label">Аватар</label>
+                        <input class="form-control" type="file" id="editAvatar" name="editAvatar">
+                    </div>
+                </form>
+                <a href="#deleteAvatarModal" class="btn mb-3 btn-danger btn-sm" data-bs-toggle="modal">Удалить аватарку</a>
             </div>
-        </div>
-        <div class="col">
-            <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="/static/img/preview.png" alt="превью">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        VideoNameVideoNameVideoNameVideoNameVideoNameVideoNameVideoNameVideoNameVideoName</h5>
-                    <p class="card-text">
-                        <a href="/channel" class="stretched-link link-body-emphasis text-decoration-none"
-                           style="position: relative; z-index: 2;">NameChannel</a>
-                    </p>
-                    <a href="/video" class="stretched-link"></a>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="/static/img/preview.png" alt="превью">
-                <div class="card-body">
-                    <h5 class="card-title">VideoName</h5>
-                    <p class="card-text">
-                        <a href="/channel" class="stretched-link link-body-emphasis text-decoration-none"
-                           style="position: relative; z-index: 2;">NameChannel</a>
-                    </p>
-                    <a href="/video" class="stretched-link"></a>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="/static/img/preview.png" alt="превью">
-                <div class="card-body">
-                    <h5 class="card-title">VideoName</h5>
-                    <p class="card-text">
-                        <a href="/channel" class="stretched-link link-body-emphasis text-decoration-none"
-                           style="position: relative; z-index: 2;">NameChannel</a>
-                    </p>
-                    <a href="/video" class="stretched-link"></a>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="/static/img/preview.png" alt="превью">
-                <div class="card-body">
-                    <h5 class="card-title">VideoName</h5>
-                    <p class="card-text">
-                        <a href="/channel" class="stretched-link link-body-emphasis text-decoration-none"
-                           style="position: relative; z-index: 2;">NameChannel</a>
-                    </p>
-                    <a href="/video" class="stretched-link"></a>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="/static/img/preview.png" alt="превью">
-                <div class="card-body">
-                    <h5 class="card-title">VideoName</h5>
-                    <p class="card-text">
-                        <a href="/channel" class="stretched-link link-body-emphasis text-decoration-none"
-                           style="position: relative; z-index: 2;">NameChannel</a>
-                    </p>
-                    <a href="/video" class="stretched-link"></a>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="/static/img/preview.png" alt="превью">
-                <div class="card-body">
-                    <h5 class="card-title">VideoName</h5>
-                    <p class="card-text">
-                        <a href="/channel" class="stretched-link link-body-emphasis text-decoration-none"
-                           style="position: relative; z-index: 2;">NameChannel</a>
-                    </p>
-                    <a href="/video" class="stretched-link"></a>
-                </div>
+            <div class="modal-footer">
+                <button type="submit" form="editForm" class="btn btn-primary">Сохранить</button>
             </div>
         </div>
     </div>
+    <script>
+    document.getElementById("editEmail").setAttribute('value', '{{current_user.email}}');
+    document.getElementById("editUsername").setAttribute('value', '{{current_user.username}}');
+</script>
+</div>
+
+<div class="modal fade" id="deleteAvatarModal" tabindex="-1" aria-labelledby="deleteAvatarModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteAvatarModalLabel">Удалить аватарку</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+            <p>Вы уверены, что хотите удалить аватарку?</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a href="/delete_avatar" class="btn btn-danger">Удалить</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editPasswordModal" tabindex="-1" aria-labelledby="editPasswordModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editPasswordModalLabel">Сменить пароль</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+        <div class="modal-body">
+            <form id="editPasswordForm" method="POST" action="{{ url_for('edit_password') }}">
+                <div class="mb-3">
+                    <label for="oldPassword" class="form-label">Старый пароль</label>
+                    <input type="password" class="form-control" id="oldPassword" name="oldPassword" required>
+                </div>
+                <div class="mb-3">
+                    <label for="newPassword" class="form-label">Новый пароль</label>
+                    <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                </div>
+                <div class="mb-3">
+                    <label for="newPasswordAgain" class="form-label">Повторите новый пароль</label>
+                    <input type="password" class="form-control" id="newPasswordAgain" name="newPasswordAgain" required>
+                </div>
+            </form>
+        </div>
+      <div class="modal-footer">
+        <button type="submit" form="editPasswordForm" class="btn btn-danger">Сменить</button>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

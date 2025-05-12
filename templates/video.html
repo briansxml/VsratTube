@@ -3,10 +3,19 @@
 {% block content %}
 <link href="/static/css/headers.css" rel="stylesheet">
 <link href="/static/css/video.css" rel="stylesheet">
-<div class="container-fluid d-flex mt-4 flex-wrap justify-content-center align-items-center">
+<script src="/static/js/video.js"></script>
+<svg xmlns="http://www.w3.org/2000/svg" class="d-none">
+    <symbol id="heart" viewBox="0 0 16 16">
+        <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/>
+    </symbol>
+    <symbol id="heart-fill" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
+    </symbol>
+</svg>
+<div class="container-fluid d-flex flex-wrap justify-content-center align-items-center">
     <div class="row">
         <div class="col-9">
-            <div class="video-container mb-4">
+            <div class="video-container">
                 <video
                         controls
                         poster="../static/img/preview.png"
@@ -21,25 +30,137 @@
                     </p>
                 </video>
             </div>
-            <h2 class="mb-3">VideoName</h2>
-            <a href="/channel" class="link-body-emphasis text-decoration-none">
-                <img src="/static/img/no_avatar.jpeg" alt="mdo" width="48" height="48" class="me-2 rounded-circle">
-                NameChannel
-            </a>
-            <p class="mt-3 mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi vel
-                consectetur interdum, nisl nunc egestas nunc, vitae tincidunt nisl nunc euismod nunc.</p>
-            <h3>Комментарии</h3>
-            <div class="d-flex">
-                <div class="input-group mt-2">
-                    <img src="/static/img/no_avatar.jpeg" alt="mdo" width="48" height="48" class="me-2 rounded-circle">
-                    <input type="text" class="form-control" placeholder="Комментарий..."
-                           aria-label="Отправить" aria-describedby="button-addon2">
-                    <button class="btn btn-outline-secondary" type="button" id="button-addon2">Отправить</button>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2>VideoName</h2>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div class="d-flex">
+                            <a href="/channel/1" class="link-body-emphasis text-decoration-none">
+                                <img src="/static/img/no_avatar.jpeg" alt="mdo" width="48" height="48"
+                                     class="me-2 rounded-circle">
+                            </a>
+                            <div>
+                                <a href="/channel/1"
+                                   class="fw-bold link-body-emphasis text-decoration-none d-block">NameChannel</a>
+                                <p><small class="text-muted" id="subCount">0</small><small class="text-muted">
+                                    подписчик</small></p>
+                            </div>
+                        </div>
+                        <div>
+                            {% if current_user.is_authenticated and current_user == user %}
+                            <button type="button" onclick="changeLike()" id="likeButton" class="btn btn-primary"
+                                    data-bs-toggle="button">
+                                <span id="likeCount" class="me-2">0</span>
+                                <svg width="16" height="16" class="bi">
+                                    <use id="likeButton_svg" href="#heart"></use>
+                                </svg>
+                            </button>
+                            {% elif current_user.is_authenticated %}
+                            <button type="button" onclick="changeLike()" id="likeButton" class="btn btn-primary"
+                                    data-bs-toggle="button">
+                                <span id="likeCount" class="me-2">0</span>
+                                <svg width="16" height="16" class="bi">
+                                    <use id="likeButton_svg" href="#heart"></use>
+                                </svg>
+                            </button>
+                            <button type="button" onclick="changeSubscribe()" id="subscribeButton"
+                                    class="btn btn-danger" data-bs-toggle="button" style="width: 120px;">Подписаться
+                            </button>
+                            {% else %}
+                            <a href="#loginModal" class="btn btn-primary"
+                               data-bs-toggle="modal">
+                                <span id="likeCount" class="me-2">0</span>
+                                <svg width="16" height="16" class="bi">
+                                    <use id="likeButton_svg" href="#heart"></use>
+                                </svg>
+                            </a>
+                            <a href="#loginModal" class="btn btn-danger" data-bs-toggle="modal" style="width: 120px;">Подписаться
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi
+                        vel
+                        consectetur interdum, nisl nunc egestas nunc, vitae tincidunt nisl nunc euismod nunc.</p>
                 </div>
             </div>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Комментарии</h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="input-group">
+                            {% if current_user.is_authenticated %}
+                            <img src="/static/img/no_avatar.jpeg" alt="mdo" width="48" height="48"
+                                 class="me-2 rounded-circle">
+                            <input type="text" class="form-control" placeholder="Комментарий..."
+                                   aria-label="Отправить" aria-describedby="button-addon2">
+                            <button class="btn btn-outline-secondary" type="button" id="button-addon2">Отправить
+                            </button>
+                            {% else %}
+                            <img src="/static/img/no_avatar.jpeg" alt="mdo" width="48" height="48"
+                                 class="me-2 rounded-circle">
+                            <input type="text" class="form-control" placeholder="Комментарий..."
+                                   aria-label="Отправить" aria-describedby="button-addon2">
+                            <a href="#loginModal" class="btn btn-outline-secondary align-content-center"
+                               data-bs-toggle="modal">Отправить
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="row mt-1 row-cols-1 g-2">
+                        <div class="col">
+                            <div class="d-flex">
+                                <a href="/channel/1">
+                                    <img src="/static/img/no_avatar.jpeg" alt="avatar" width="48" height="48"
+                                         class="rounded-circle me-3">
+                                </a>
+                                <div>
+                                    <a href="/channel/1"
+                                       class="fw-bold link-body-emphasis text-decoration-none d-block">NameChannel</a>
+                                    <p>Comment.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="d-flex">
+                                <a href="/channel/1">
+                                    <img src="/static/img/no_avatar.jpeg" alt="avatar" width="48" height="48"
+                                         class="rounded-circle me-3">
+                                </a>
+                                <div>
+                                    <a href="/channel/1"
+                                       class="fw-bold link-body-emphasis text-decoration-none d-block">NameChannel</a>
+                                    <p>Hmm.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="d-flex">
+                                <a href="/channel/1">
+                                    <img src="/static/img/no_avatar.jpeg" alt="avatar" width="48" height="48"
+                                         class="rounded-circle me-3">
+                                </a>
+                                <div>
+                                    <a href="/channel/1"
+                                       class="fw-bold link-body-emphasis text-decoration-none d-block">NameChannel</a>
+                                    <p>Awesome.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
         <div class="col">
-            <h3>Последние видео:</h3>
+
+            <h3>Последние видео</h3>
             <div class="row mx-auto row-cols-1 g-2">
                 <div class="col">
                     <div class="card">
@@ -49,9 +170,29 @@
                             </div>
                             <div class="col">
                                 <div class="card-body">
+                                    <a href="/video" class="stretched-link"></a>
                                     <h5 class="card-title">VideoName</h5>
                                     <p class="card-text">
-                                        <a href="/channel"
+                                        <a href="/channel/1"
+                                           class="stretched-link link-body-emphasis text-decoration-none"
+                                           style="position: relative; z-index: 2;">NameChannel</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="row g-0">
+                            <div class="col-5">
+                                <img src="../static/img/preview.png" class="img-fluid rounded-start">
+                            </div>
+                            <div class="col">
+                                <div class="card-body">
+                                    <h5 class="card-title">VideoName</h5>
+                                    <p class="card-text">
+                                        <a href="/channel/1"
                                            class="stretched-link link-body-emphasis text-decoration-none"
                                            style="position: relative; z-index: 2;">NameChannel</a>
                                     </p>
@@ -71,7 +212,7 @@
                                 <div class="card-body">
                                     <h5 class="card-title">VideoName</h5>
                                     <p class="card-text">
-                                        <a href="/channel"
+                                        <a href="/channel/1"
                                            class="stretched-link link-body-emphasis text-decoration-none"
                                            style="position: relative; z-index: 2;">NameChannel</a>
                                     </p>
@@ -91,7 +232,7 @@
                                 <div class="card-body">
                                     <h5 class="card-title">VideoName</h5>
                                     <p class="card-text">
-                                        <a href="/channel"
+                                        <a href="/channel/1"
                                            class="stretched-link link-body-emphasis text-decoration-none"
                                            style="position: relative; z-index: 2;">NameChannel</a>
                                     </p>
@@ -100,29 +241,9 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col">
-                    <div class="card">
-                        <div class="row g-0">
-                            <div class="col-5">
-                                <img src="../static/img/preview.png" class="img-fluid rounded-start">
-                            </div>
-                            <div class="col">
-                                <div class="card-body">
-                                    <h5 class="card-title">VideoName</h5>
-                                    <p class="card-text">
-                                        <a href="/channel"
-                                           class="stretched-link link-body-emphasis text-decoration-none"
-                                           style="position: relative; z-index: 2;">NameChannel</a>
-                                    </p>
-                                    <a href="/video" class="stretched-link"></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div>
                 </div>
             </div>
         </div>
-        {% endblock %}
+    </div>
+</div>
+{% endblock %}
