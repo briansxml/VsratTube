@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<link href="/static/css/headers.css" rel="stylesheet">
+<link href="/static/css/headers.css" rel="stylesheet" xmlns="http://www.w3.org/1999/html">
 <link href="/static/css/video.css" rel="stylesheet">
 <script src="/static/js/video.js"></script>
 <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
@@ -12,15 +12,15 @@
         <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
     </symbol>
 </svg>
-<div class="container-fluid d-flex flex-wrap justify-content-center align-items-center">
+<div class="container-fluid h-100 d-flex flex-wrap justify-content-center align-items-center">
     <div class="row">
         <div class="col-9">
             <div class="video-container">
                 <video
                         controls
-                        poster="../static/img/preview.png"
+                        poster=" {{ video.preview }} "
                 >
-                    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4"/>
+                    <source src=" {{ video.video_path }} " type="video/mp4"/>
                     <p class="vjs-no-js">
                         To view this video please enable JavaScript, and consider upgrading to a
                         web browser that
@@ -32,46 +32,72 @@
             </div>
             <div class="card mb-4">
                 <div class="card-header">
-                    <h2>VideoName</h2>
+                    <h2> {{ video.title }} </h2>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div class="d-flex">
-                            <a href="/channel/1" class="link-body-emphasis text-decoration-none">
-                                <img src="/static/img/no_avatar.jpeg" alt="mdo" width="48" height="48"
+                            <a href="/channel/{{ user.id }}" class="link-body-emphasis text-decoration-none">
+                                <img src="{{ user.avatar }}" alt="mdo" width="48" height="48"
                                      class="me-2 rounded-circle">
                             </a>
                             <div>
-                                <a href="/channel/1"
-                                   class="fw-bold link-body-emphasis text-decoration-none d-block">NameChannel</a>
-                                <p><small class="text-muted" id="subCount">0</small><small class="text-muted">
+                                <a href="/channel/{{ user.id }}"
+                                   class="fw-bold link-body-emphasis text-decoration-none d-block">{{ user.username }}</a>
+                                <p><small class="text-muted" id="subCount">{{ user.followers.all()|length }}</small><small class="text-muted">
                                     подписчик</small></p>
                             </div>
                         </div>
                         <div>
                             {% if current_user.is_authenticated and current_user == user %}
-                            <button type="button" onclick="changeLike()" id="likeButton" class="btn btn-primary"
+                            <a href="#deleteVideoModal" class="btn btn-danger" data-bs-toggle="modal">Удалить</a>
+                            <a href="#editVideoModal" class="btn btn-primary me-3" data-bs-toggle="modal">Редактировать</a>
+                            {% if not video.is_liked(current_user) %}
+                            <button type="button" onclick="changeLike({{ video.id }})" id="likeButton" class="btn btn-primary"
                                     data-bs-toggle="button">
-                                <span id="likeCount" class="me-2">0</span>
+                                <span id="likeCount" class="me-2">{{ video.likers.all()|length }}</span>
                                 <svg width="16" height="16" class="bi">
                                     <use id="likeButton_svg" href="#heart"></use>
                                 </svg>
                             </button>
+                            {% else %}
+                            <button type="button" onclick="changeLike({{ video.id }})" id="likeButton" class="btn btn-primary active"
+                                    data-bs-toggle="button">
+                                <span id="likeCount" class="me-2">{{ video.likers.all()|length }}</span>
+                                <svg width="16" height="16" class="bi">
+                                    <use id="likeButton_svg" href="#heart-fill"></use>
+                                </svg>
+                            </button>
+                            {% endif %}
                             {% elif current_user.is_authenticated %}
-                            <button type="button" onclick="changeLike()" id="likeButton" class="btn btn-primary"
+                            {% if not video.is_liked(current_user) %}
+                            <button type="button" onclick="changeLike({{ video.id }})" id="likeButton" class="btn btn-primary"
                                     data-bs-toggle="button">
-                                <span id="likeCount" class="me-2">0</span>
+                                <span id="likeCount" class="me-2">{{ video.likers.all()|length }}</span>
                                 <svg width="16" height="16" class="bi">
                                     <use id="likeButton_svg" href="#heart"></use>
                                 </svg>
                             </button>
-                            <button type="button" onclick="changeSubscribe()" id="subscribeButton"
-                                    class="btn btn-danger" data-bs-toggle="button" style="width: 120px;">Подписаться
+                            {% else %}
+                            <button type="button" onclick="changeLike({{ video.id }})" id="likeButton" class="btn btn-primary active"
+                                    data-bs-toggle="button">
+                                <span id="likeCount" class="me-2">{{ video.likers.all()|length }}</span>
+                                <svg width="16" height="16" class="bi">
+                                    <use id="likeButton_svg" href="#heart-fill"></use>
+                                </svg>
                             </button>
+                            {% endif %}
+                            {% if not current_user.is_following(user) %}
+                            <button type="button" onclick="changeSubscribe({{ user.id }})" id="subscribeButton"
+                                    class="btn btn-danger" data-bs-toggle="button" style="width: 120px;">Подписаться</button>
+                            {% else %}
+                            <button type="button" onclick="changeSubscribe({{ user.id }})" id="subscribeButton"
+                                    class="btn btn-danger active" data-bs-toggle="button" style="width: 120px;">Отписаться</button>
+                            {% endif %}
                             {% else %}
                             <a href="#loginModal" class="btn btn-primary"
                                data-bs-toggle="modal">
-                                <span id="likeCount" class="me-2">0</span>
+                                <span id="likeCount" class="me-2">{{ video.likers.all()|length }}</span>
                                 <svg width="16" height="16" class="bi">
                                     <use id="likeButton_svg" href="#heart"></use>
                                 </svg>
@@ -81,9 +107,8 @@
                             {% endif %}
                         </div>
                     </div>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisi
-                        vel
-                        consectetur interdum, nisl nunc egestas nunc, vitae tincidunt nisl nunc euismod nunc.</p>
+                    <p>{{ video.description }}</p>
+                    <p class="text-muted">{{ video.created_date.strftime("%Y-%m-%d %H:%M") }}</p>
                 </div>
             </div>
             <div class="card mb-4">
@@ -94,7 +119,7 @@
                     <div class="d-flex">
                         <div class="input-group">
                             {% if current_user.is_authenticated %}
-                            <img src="/static/img/no_avatar.jpeg" alt="mdo" width="48" height="48"
+                            <img src="{{ current_user.avatar }}" alt="mdo" width="48" height="48"
                                  class="me-2 rounded-circle">
                             <input type="text" class="form-control" placeholder="Комментарий..."
                                    aria-label="Отправить" aria-describedby="button-addon2">
@@ -159,89 +184,124 @@
 
         </div>
         <div class="col">
-
             <h3>Последние видео</h3>
             <div class="row mx-auto row-cols-1 g-2">
+                {% for video in videos_last %}
                 <div class="col">
                     <div class="card">
                         <div class="row g-0">
                             <div class="col-5">
-                                <img src="../static/img/preview.png" class="img-fluid rounded-start">
+                                <img src="{{ video.preview }}" class="img-fluid rounded-start">
                             </div>
                             <div class="col">
                                 <div class="card-body">
-                                    <a href="/video" class="stretched-link"></a>
-                                    <h5 class="card-title">VideoName</h5>
+                                    <a href="/video/{{ video.id }}" class="stretched-link"></a>
+                                    <h5 class="card-title">{{ video.title }}</h5>
                                     <p class="card-text">
-                                        <a href="/channel/1"
+                                        <a href="/channel/{{ video.author_id }}"
                                            class="stretched-link link-body-emphasis text-decoration-none"
-                                           style="position: relative; z-index: 2;">NameChannel</a>
+                                           style="position: relative; z-index: 2;">{{ video.author.username }}</a>
                                     </p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                {% endfor %}
                 <div class="col">
-                    <div class="card">
-                        <div class="row g-0">
-                            <div class="col-5">
-                                <img src="../static/img/preview.png" class="img-fluid rounded-start">
-                            </div>
-                            <div class="col">
-                                <div class="card-body">
-                                    <h5 class="card-title">VideoName</h5>
-                                    <p class="card-text">
-                                        <a href="/channel/1"
-                                           class="stretched-link link-body-emphasis text-decoration-none"
-                                           style="position: relative; z-index: 2;">NameChannel</a>
-                                    </p>
-                                    <a href="/video" class="stretched-link"></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <img src="../static/img/preview.png" class="img-fluid rounded-start" style="opacity: 0; pointer-events: none;">
                 </div>
                 <div class="col">
-                    <div class="card">
-                        <div class="row g-0">
-                            <div class="col-5">
-                                <img src="../static/img/preview.png" class="img-fluid rounded-start">
-                            </div>
-                            <div class="col">
-                                <div class="card-body">
-                                    <h5 class="card-title">VideoName</h5>
-                                    <p class="card-text">
-                                        <a href="/channel/1"
-                                           class="stretched-link link-body-emphasis text-decoration-none"
-                                           style="position: relative; z-index: 2;">NameChannel</a>
-                                    </p>
-                                    <a href="/video" class="stretched-link"></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <img src="../static/img/preview.png" class="img-fluid rounded-start" style="opacity: 0; pointer-events: none;">
                 </div>
-                <div class="col">
-                    <div class="card">
-                        <div class="row g-0">
-                            <div class="col-5">
-                                <img src="../static/img/preview.png" class="img-fluid rounded-start">
-                            </div>
-                            <div class="col">
-                                <div class="card-body">
-                                    <h5 class="card-title">VideoName</h5>
-                                    <p class="card-text">
-                                        <a href="/channel/1"
-                                           class="stretched-link link-body-emphasis text-decoration-none"
-                                           style="position: relative; z-index: 2;">NameChannel</a>
-                                    </p>
-                                    <a href="/video" class="stretched-link"></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteVideoModal" tabindex="-1" aria-labelledby="deleteVideoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteVideoModalLabel">Удалить видео</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+        <div class="modal-body">
+            <form id="deleteVideoForm" method="POST" action="{{ url_for('delete_video') }}">
+                <input type="hidden" name="video_id" value="{{ video.id }}">
+                <div class="mb-3">
+                    <p>Вы уверены, что хотите удалить это видео?</p>
                 </div>
+            </form>
+        </div>
+      <div class="modal-footer">
+        <button type="submit" form="deleteVideoForm" class="btn btn-danger">Удалить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editVideoModal" tabindex="-1" aria-labelledby="editVideoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editVideoModalLabel">Редактировать видео</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editVideoForm" method="POST" enctype="multipart/form-data" action="{{ url_for('edit_video') }}">
+                    <input type="hidden" name="video_id" value="{{ video.id }}">
+                    <div class="mb-3">
+                        <label for="editTitle" class="form-label">Название видео</label>
+                        <input type="text" class="form-control" id="editTitle" name="editTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDescription" class="form-label">Описание</label>
+                        <textarea class="form-control" id="editDescription" name="editDescription" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPreview" class="form-label">Превью (необязательно)</label>
+                        <input class="form-control" type="file" id="editPreview" name="editPreview" accept="image/*">
+                        <a href="#deleteVideoPreviewModal" class="btn btn-danger mt-3 btn-sm" data-bs-toggle="modal">Удалить превью</a>
+                    </div>
+                    <div class="form-check mb-3">
+                        <label class="form-check-label" for="editIs_private">
+                            Ограниченный доступ
+                        </label>
+                        <input class="form-check-input" type="checkbox" id="editIs_private" name="editIs_private">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" form="editVideoForm" class="btn btn-primary">Сохранить</button>
+            </div>
+        </div>
+    </div>
+    <script>
+    document.getElementById("editIs_private").checked = ('{{ video.is_private }}' === 'True');
+    document.getElementById("editDescription").value = '{{ video.description }}';
+    document.getElementById("editTitle").setAttribute('value', '{{video.title}}');
+    </script>
+</div>
+
+<div class="modal fade" id="deleteVideoPreviewModal" tabindex="-1" aria-labelledby="deleteVideoPreviewModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteVideoPreviewModalLabel">Удалить превью</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="deleteVideoPreviewForm" method="POST" action="{{ url_for('delete_preview') }}">
+                    <input type="hidden" name="video_id" value="{{ video.id }}">
+                    <div class="mb-3">
+                        <p>Вы уверены, что хотите удалить превью?</p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" form="deleteVideoPreviewForm" class="btn btn-danger">Удалить</button>
             </div>
         </div>
     </div>

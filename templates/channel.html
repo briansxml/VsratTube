@@ -7,7 +7,7 @@
         <div class="col-md-3">
             <div class="card">
                 <div class="card-body text-center">
-                    <img src="{{ user.avatar or '/static/img/no_avatar.jpeg' }}" class="rounded-circle mb-3" width="150"
+                    <img src="{{ user.avatar }}" class="rounded-circle mb-3" width="150"
                          height="150">
                     <h4>{{ user.username }}</h4>
                     <div>
@@ -19,7 +19,7 @@
                     <a href="#editModal" class="btn btn-primary" data-bs-toggle="modal">Редактировать профиль</a>
                     <a href="#editPasswordModal" class="btn btn-danger mt-1" data-bs-toggle="modal">Сменить пароль</a>
                     {% elif current_user.is_authenticated %}
-                    {% if not user.followers.filter(followers.c.follower_id == current_user.id).all() %}
+                    {% if not current_user.is_following(user) %}
                     <button type="button" onclick="changeSubscribe({{ user.id }})" id="subscribeButton"
                             class="btn btn-danger" data-bs-toggle="button" style="width: 120px;">Подписаться</button>
                     {% else %}
@@ -39,20 +39,25 @@
                 </div>
                 <div class="card-body">
                     <div class="row row-cols-1 row-cols-md-4 g-4">
+                        {% for video in videos %}
                         <div class="col">
                             <div class="card h-100">
-                                <img src="{{ '/static/img/preview.png' }}" class="card-img-top"
+                                <img src="{{ video.preview }}" class="card-img-top"
                                      alt="превью">
                                 <div class="card-body">
-                                    <a href="/video" class="stretched-link"></a>
-                                    <h5 class="card-title">video.title</h5>
-                                    <p class="card-text text-muted">video.likes нравится</p>
+                                    <a href="/video/{{ video.id }}" class="stretched-link"></a>
+                                    <h5 class="card-title">{{ video.title }}</h5>
+                                    <p class="card-text text-muted">{{ video.likers.all()|length }} нравится</p>
                                 </div>
                                 <div class="card-footer">
-                                    <small class="text-muted">video.upload_date</small>
+                                    <small class="text-muted">{{ video.created_date.strftime("%Y-%m-%d %H:%M") }}</small>
+                                    {% if video.is_private %}
+                                    <small class="text-muted">Приватное</small>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>

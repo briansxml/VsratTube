@@ -5,10 +5,14 @@ from PIL import Image
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_restful import Api
+from sqlalchemy import desc
 
 from data import db_session
-from data.api import users_resources
+from data.api import users_resources, videos_resources
 from data.users import User, followers
+from data.video import Video
+
+from pyffmpeg import FFmpeg
 
 app = Flask(__name__)
 api = Api(app)
@@ -30,7 +34,10 @@ def load_user(user_id):
 
 @app.route('/')
 def index():
-    return render_template('index.html', title='VsratTube')
+    db_sess = db_session.create_session()
+    videos = db_sess.query(Video).filter(Video.is_private == False).order_by(desc(Video.id))
+
+    return render_template('index.html', title='VsratTube', videos=videos)
 
 
 @app.route('/search', methods=['GET'])
@@ -41,17 +48,31 @@ def search():
     return redirect("/")
 
 
-@app.route('/video')
-def video():
-    return render_template('video.html', title='VideoName')
+@app.route('/video/<int:id_video>')
+def video(id_video):
+    db_sess = db_session.create_session()
+    video = db_sess.query(Video).get(id_video)
+    c_user = db_sess.query(User).get(current_user.id) if current_user.is_authenticated else None
+    videos_last = db_sess.query(Video).filter(Video.is_private == False).order_by(desc(Video.id))
+
+    if video and (video.is_private == False or (video.is_private == True and c_user == video.author)):
+        return render_template('video.html', title=video.title, video=video, current_user=c_user,
+                               user=video.author, videos_last=videos_last)
+    else:
+        return "Видео не найдено"
 
 
 @app.route('/channel/<int:id_user>')
 def channel(id_user):
     db_sess = db_session.create_session()
     u = db_sess.query(User).get(id_user)
+    c_user = db_sess.query(User).get(current_user.id) if current_user.is_authenticated else None
+    videos = u.videos.filter(Video.is_private == False).order_by(
+        desc(Video.id)) if u != c_user else u.videos.order_by(desc(Video.id))
+
     if u:
-        return render_template('channel.html', followers=followers, title=u.username, user=u, current_user=current_user)
+        return render_template('channel.html', videos=videos, followers=followers, title=u.username, user=u,
+                               current_user=c_user)
     else:
         return "Канал не найден"
 
@@ -64,29 +85,29 @@ def upload():
         description = request.form.get('description')
         video_file = request.files['video']
         preview_file = request.files.get('preview')
-        is_private = request.form.get('is_private')
+        is_private = request.form.getlist('is_private')
+
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).get(current_user.id)
 
         if video_file:
             video_filename = f"video_{current_user.id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.mp4"
             video_path = os.path.join(f"{app.config['UPLOAD_FOLDER']}/videos", video_filename)
             video_file.save(video_path)
 
-            preview_path = os.path.join(f"{app.config['UPLOAD_FOLDER']}/previews", video_filename)
+            preview_filename = f"preview_{current_user.id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
+            preview_path = os.path.join(f"{app.config['UPLOAD_FOLDER']}/previews", preview_filename)
             if preview_file:
-                preview_filename = f"preview_{current_user.id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
-                preview_path = os.path.join(app.config['UPLOAD_FOLDER'], preview_filename)
                 preview_file.save(preview_path)
+            else:
+                ff = FFmpeg()
+                ff.options(f'-i {video_path} -vframes 1 {preview_path}')
 
-            current_user.videos.append({
-                'title': title,
-                'description': description,
-                'video_path': '/' + video_path,
-                'preview': '/' + preview_path if preview_path else '/static/img/preview.png',
-                'is_private': is_private,
-                'likes': 0,
-                'upload_date': datetime.now().strftime('%Y%m%d%H%M%S')
-            })
+            user.videos.append(
+                Video(video_path=f'/{video_path}', preview=f'/{preview_path}', title=title, description=description,
+                      is_private=bool(is_private), author_id=current_user.id))
 
+            db_sess.commit()
             flash('Видео успешно загружено!', 'success')
             return redirect(url_for('channel', id_user=current_user.id))
 
@@ -94,8 +115,19 @@ def upload():
 
 
 @app.route('/followed')
+@login_required
 def followed():
-    return render_template('followed.html', title="Мои подписки", current_user=current_user)
+    users = current_user.followed.all()
+
+    return render_template('followed.html', title="Мои подписки", users=users)
+
+
+@app.route('/liked')
+@login_required
+def liked():
+    videos = current_user.liked.filter(Video.is_private == False)
+
+    return render_template('liked.html', title="Понравившиеся видео", current_user=current_user, videos=videos)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -119,6 +151,7 @@ def login():
 
 
 @app.route('/edit_password', methods=['POST'])
+@login_required
 def edit_password():
     old_password = request.form.get('oldPassword')
     new_password = request.form.get('newPassword')
@@ -141,6 +174,7 @@ def edit_password():
 
 
 @app.route('/edit_profile', methods=['POST'])
+@login_required
 def edit_profile():
     email = request.form.get('editEmail')
     username = request.form.get('editUsername')
@@ -182,6 +216,7 @@ def edit_profile():
 
 
 @app.route('/delete_avatar')
+@login_required
 def delete_avatar():
     db_sess = db_session.create_session()
     user = db_sess.query(User).get(current_user.id)
@@ -190,6 +225,65 @@ def delete_avatar():
     db_sess.commit()
 
     flash('Аватарка удалена', 'success')
+    return redirect(url_for('channel', id_user=current_user.id))
+
+
+@app.route('/delete_preview', methods=['POST'])
+@login_required
+def delete_preview():
+    db_sess = db_session.create_session()
+    video_id = request.form.get('video_id')
+    video_edit = db_sess.query(Video).filter(Video.author == current_user, Video.id == video_id).first()
+
+    preview_filename = f"preview_{current_user.id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
+    preview_path = os.path.join(f"{app.config['UPLOAD_FOLDER']}/previews", preview_filename)
+    ff = FFmpeg()
+    ff.options(f'-i {video_edit.video_path[1:]} -vframes 1 {preview_path}')
+    video_edit.preview = f'/{preview_path}'
+    db_sess.commit()
+
+    flash('Превью удален', 'success')
+    return redirect(url_for('video', id_video=video_edit.id))
+
+
+@app.route('/edit_video', methods=['POST'])
+@login_required
+def edit_video():
+    db_sess = db_session.create_session()
+    video_id = request.form.get('video_id')
+    title = request.form.get('editTitle')
+    description = request.form.get('editDescription')
+    preview_file = request.files.get('editPreview')
+    is_private = request.form.getlist('editIs_private')
+    video_edit = db_sess.query(Video).filter(Video.author == current_user, Video.id == video_id).first()
+
+    preview_filename = f"preview_{current_user.id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
+    preview_path = os.path.join(f"{app.config['UPLOAD_FOLDER']}/previews", preview_filename)
+    if preview_file:
+        preview_file.save(preview_path)
+        video_edit.preview = f'/{preview_path}'
+
+    video_edit.title = title
+    video_edit.description = description
+    video_edit.is_private = bool(is_private)
+
+    db_sess.commit()
+
+    flash('Видео изменено', 'success')
+    return redirect(url_for('video', id_video=video_edit.id))
+
+
+@app.route('/delete_video', methods=['POST'])
+@login_required
+def delete_video():
+    db_sess = db_session.create_session()
+    video_id = request.form.get('video_id')
+    video_delete = db_sess.query(Video).filter(Video.author == current_user, Video.id == video_id).first()
+
+    db_sess.delete(video_delete)
+    db_sess.commit()
+
+    flash('Видео удалено', 'success')
     return redirect(url_for('channel', id_user=current_user.id))
 
 
@@ -240,6 +334,8 @@ def main():
     api.add_resource(users_resources.UserUnfollowResource, '/api/users/<int:user_id>/unfollow')
     api.add_resource(users_resources.UserAvatarDeleteResource, '/api/users/avatar_delete')
     api.add_resource(users_resources.UserChangePasswordResource, '/api/users/change_password')
+    api.add_resource(videos_resources.VideoLikeResource, '/api/videos/<int:video_id>/like')
+    api.add_resource(videos_resources.VideoUnlikeResource, '/api/videos/<int:video_id>/unlike')
 
     if not os.path.exists(f"{app.config['UPLOAD_FOLDER']}/avatars"):
         os.makedirs(f"{app.config['UPLOAD_FOLDER']}/avatars")
@@ -247,6 +343,8 @@ def main():
         os.makedirs(f"{app.config['UPLOAD_FOLDER']}/previews")
     if not os.path.exists(f"{app.config['UPLOAD_FOLDER']}/videos"):
         os.makedirs(f"{app.config['UPLOAD_FOLDER']}/videos")
+    if not os.path.exists("/db"):
+        os.makedirs("/db")
 
     app.run()
 

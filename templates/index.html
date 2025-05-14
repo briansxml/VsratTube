@@ -4,111 +4,22 @@
 <h1 style="padding: 1rem;">Последние видео</h1>
 <div class="container-fluid">
     <div class="row mx-auto row-cols-auto g-4">
+        {% for video in videos %}
         <div class="col">
             <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="/static/img/preview.png" alt="превью">
+                <img class="card-img-top" src="{{ video.preview }}" alt="превью">
                 <div class="card-body">
-                    <a href="/video" class="stretched-link"></a>
-                    <h5 class="card-title">VideoNameVideoNameVideoNameVideoNameVideoName</h5>
+                    <a href="/video/{{ video.id }}" class="stretched-link"></a>
+                    <h5 class="card-title">{{ video.title }}</h5>
                     <p class="card-text">
-                        <a href="/channel/1" class="stretched-link link-body-emphasis text-decoration-none"
-                           style="position: relative; z-index: 2;">NameChannel</a>
+                        <a href="/channel/{{ video.author_id }}"
+                           class="stretched-link link-body-emphasis text-decoration-none"
+                           style="position: relative; z-index: 2;">{{ video.author.username }}</a>
                     </p>
                 </div>
             </div>
         </div>
-        <div class="col">
-            <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="/static/img/preview.png" alt="превью">
-                <div class="card-body">
-                    <h5 class="card-title">VideoName</h5>
-                    <p class="card-text">
-                        <a href="/channel/1" class="stretched-link link-body-emphasis text-decoration-none"
-                           style="position: relative; z-index: 2;">NameChannel</a>
-                    </p>
-                    <a href="/video" class="stretched-link"></a>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="/static/img/preview.png" alt="превью">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        VideoNameVideoNameVideoNameVideoNameVideoNameVideoNameVideoNameVideoNameVideoName</h5>
-                    <p class="card-text">
-                        <a href="/channel/1" class="stretched-link link-body-emphasis text-decoration-none"
-                           style="position: relative; z-index: 2;">NameChannel</a>
-                    </p>
-                    <a href="/video" class="stretched-link"></a>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="/static/img/preview.png" alt="превью">
-                <div class="card-body">
-                    <h5 class="card-title">VideoName</h5>
-                    <p class="card-text">
-                        <a href="/channel/1" class="stretched-link link-body-emphasis text-decoration-none"
-                           style="position: relative; z-index: 2;">NameChannel</a>
-                    </p>
-                    <a href="/video" class="stretched-link"></a>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="/static/img/preview.png" alt="превью">
-                <div class="card-body">
-                    <h5 class="card-title">VideoName</h5>
-                    <p class="card-text">
-                        <a href="/channel/1" class="stretched-link link-body-emphasis text-decoration-none"
-                           style="position: relative; z-index: 2;">NameChannel</a>
-                    </p>
-                    <a href="/video" class="stretched-link"></a>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="/static/img/preview.png" alt="превью">
-                <div class="card-body">
-                    <h5 class="card-title">VideoName</h5>
-                    <p class="card-text">
-                        <a href="/channel/1" class="stretched-link link-body-emphasis text-decoration-none"
-                           style="position: relative; z-index: 2;">NameChannel</a>
-                    </p>
-                    <a href="/video" class="stretched-link"></a>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="/static/img/preview.png" alt="превью">
-                <div class="card-body">
-                    <h5 class="card-title">VideoName</h5>
-                    <p class="card-text">
-                        <a href="/channel/1" class="stretched-link link-body-emphasis text-decoration-none"
-                           style="position: relative; z-index: 2;">NameChannel</a>
-                    </p>
-                    <a href="/video" class="stretched-link"></a>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="/static/img/preview.png" alt="превью">
-                <div class="card-body">
-                    <h5 class="card-title">VideoName</h5>
-                    <p class="card-text">
-                        <a href="/channel/1" class="stretched-link link-body-emphasis text-decoration-none"
-                           style="position: relative; z-index: 2;">NameChannel</a>
-                    </p>
-                    <a href="/video" class="stretched-link"></a>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

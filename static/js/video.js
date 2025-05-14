@@ -1,24 +1,28 @@
-function changeLike() {
+function changeLike(id) {
     var elem = document.getElementById("likeButton_svg");
     var heart_type = elem.getAttribute("href");
     var like_count = document.getElementById("likeCount");
     if (heart_type == "#heart") {
         elem.setAttribute("href", "#heart-fill");
         like_count.innerHTML = parseInt(like_count.innerHTML, 10) + 1;
+        fetch('/api/videos/' + id + '/like');
     } else {
         elem.setAttribute("href", "#heart");
         like_count.innerHTML = parseInt(like_count.innerHTML, 10) - 1;
+        fetch('/api/videos/' + id + '/unlike');
     }
 }
 
-function changeSubscribe() {
+function changeSubscribe(id) {
     var elem = document.getElementById("subscribeButton");
     var sub_count = document.getElementById("subCount");
     if (elem.innerHTML == "Отписаться") {
         elem.innerHTML = "Подписаться";
         sub_count.innerHTML = parseInt(sub_count.innerHTML, 10) - 1;
+        fetch('/api/users/' + id + '/unfollow');
     } else {
         elem.innerHTML = "Отписаться";
         sub_count.innerHTML = parseInt(sub_count.innerHTML, 10) + 1;
+        fetch('/api/users/' + id + '/follow');
     }
 }

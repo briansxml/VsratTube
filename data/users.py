@@ -28,7 +28,8 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
         secondaryjoin=(id == followers.c.followed_id),
         backref=backref('followers', lazy='dynamic'), lazy='dynamic')
 
-    # videos = relationship("Video", back_populates='user')
+    videos = relationship("Video", back_populates='author', lazy='dynamic')
+
     # comments = relationship("Comment", back_populates='user')
 
     def set_password(self, password):

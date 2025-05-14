@@ -8,7 +8,7 @@
         </div>
         <div class="card-body">
             <div class="row row-cols-5 g-4">
-                {% for user in current_user.followed.all() %}
+                {% for user in users %}
                 <div class="col">
                     <div class="card h-100">
                         <img src="{{ user.avatar }}" class="rounded-circle card-img-top"
