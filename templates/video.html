@@ -122,9 +122,8 @@
                             <img src="{{ current_user.avatar }}" alt="mdo" width="48" height="48"
                                  class="me-2 rounded-circle">
                             <input type="text" class="form-control" placeholder="Комментарий..."
-                                   aria-label="Отправить" aria-describedby="button-addon2">
-                            <button class="btn btn-outline-secondary" type="button" id="button-addon2">Отправить
-                            </button>
+                                   id="commentInput" name="commentInput" aria-describedby="button-addon2">
+                            <button class="btn btn-outline-secondary" onclick="commentVideo({{ video.id }})" type="button" id="button-addon2">Отправить</button>
                             {% else %}
                             <img src="/static/img/no_avatar.jpeg" alt="mdo" width="48" height="48"
                                  class="me-2 rounded-circle">
@@ -138,46 +137,25 @@
                     </div>
                 </div>
                 <div class="card-footer">
-                    <div class="row mt-1 row-cols-1 g-2">
+                    <div id="commentsList" class="row mt-1 row-cols-1 g-2">
+                        {% for comment in video.comments.all()|reverse %}
                         <div class="col">
                             <div class="d-flex">
-                                <a href="/channel/1">
-                                    <img src="/static/img/no_avatar.jpeg" alt="avatar" width="48" height="48"
+                                <a href="/channel/{{comment.author_id}}">
+                                    <img src="{{comment.author.avatar}}" alt="avatar" width="48" height="48"
                                          class="rounded-circle me-3">
                                 </a>
                                 <div>
-                                    <a href="/channel/1"
-                                       class="fw-bold link-body-emphasis text-decoration-none d-block">NameChannel</a>
-                                    <p>Comment.</p>
+                                    <div>
+                                        <a href="/channel/{{comment.author_id}}"
+                                           class="fw-bold link-body-emphasis text-decoration-none">{{comment.author.username}}</a>
+                                        <small class="text-muted ms-1">{{ comment.created_date.strftime("%Y-%m-%d %H:%M") }}</small>
+                                    </div>
+                                    <p>{{ comment.text }}</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="col">
-                            <div class="d-flex">
-                                <a href="/channel/1">
-                                    <img src="/static/img/no_avatar.jpeg" alt="avatar" width="48" height="48"
-                                         class="rounded-circle me-3">
-                                </a>
-                                <div>
-                                    <a href="/channel/1"
-                                       class="fw-bold link-body-emphasis text-decoration-none d-block">NameChannel</a>
-                                    <p>Hmm.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="d-flex">
-                                <a href="/channel/1">
-                                    <img src="/static/img/no_avatar.jpeg" alt="avatar" width="48" height="48"
-                                         class="rounded-circle me-3">
-                                </a>
-                                <div>
-                                    <a href="/channel/1"
-                                       class="fw-bold link-body-emphasis text-decoration-none d-block">NameChannel</a>
-                                    <p>Awesome.</p>
-                                </div>
-                            </div>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>

@@ -26,3 +26,18 @@ function changeSubscribe(id) {
         fetch('/api/users/' + id + '/follow');
     }
 }
+
+function commentVideo(id) {
+    var text = document.getElementById("commentInput").value.trim();
+    if (text) {
+        fetch("/api/comment", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({video_id: id, text: text})
+        })
+        location.reload();
+    }
+
+}

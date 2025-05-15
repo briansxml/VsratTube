@@ -11,6 +11,11 @@ def abort_if_user_not_found(user_id):
     if not user:
         abort(404, message=f"User {user_id} not found")
 
+def abort_if_user_not_authorized():
+    session = db_session.create_session()
+    user = session.merge(current_user) if current_user.is_authenticated else None
+    if not user:
+        abort(401, message=f"Unauthorized")
 
 parser_usersChangePassword = reqparse.RequestParser()
 parser_usersChangePassword.add_argument('old_password', required=True)
@@ -21,9 +26,9 @@ parser_usersChangePassword.add_argument('new_password_again', required=True)
 class UserChangePasswordResource(Resource):
     def post(self):
         args = parser_usersChangePassword.parse_args()
-
+        abort_if_user_not_authorized()
         db_sess = db_session.create_session()
-        user = db_sess.query(User).get(current_user.id)
+        user = db_sess.merge(current_user)
 
         if user.check_password(args['old_password']):
             if args['new_password'] == args['new_password_again']:
@@ -38,6 +43,7 @@ class UserChangePasswordResource(Resource):
 
 class UserAvatarDeleteResource(Resource):
     def get(self):
+        abort_if_user_not_authorized()
         db_sess = db_session.create_session()
         current = db_sess.merge(current_user)
         current.avatar = '/static/img/no_avatar.jpeg'
@@ -49,6 +55,7 @@ class UserAvatarDeleteResource(Resource):
 class UserUnfollowResource(Resource):
     def get(self, user_id):
         abort_if_user_not_found(user_id)
+        abort_if_user_not_authorized()
         db_sess = db_session.create_session()
         user = db_sess.query(User).get(user_id)
         current = db_sess.merge(current_user)
@@ -63,6 +70,7 @@ class UserUnfollowResource(Resource):
 class UserFollowResource(Resource):
     def get(self, user_id):
         abort_if_user_not_found(user_id)
+        abort_if_user_not_authorized()
         db_sess = db_session.create_session()
         user = db_sess.query(User).get(user_id)
         current = db_sess.merge(current_user)

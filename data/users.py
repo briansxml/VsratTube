@@ -29,8 +29,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
         backref=backref('followers', lazy='dynamic'), lazy='dynamic')
 
     videos = relationship("Video", back_populates='author', lazy='dynamic')
-
-    # comments = relationship("Comment", back_populates='user')
+    comments = relationship("Comment", back_populates='author')
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)

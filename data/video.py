@@ -6,6 +6,7 @@ from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy_serializer import SerializerMixin
 
+from data.comments import Comment
 from data.db_session import SqlAlchemyBase
 from data.users import User
 
@@ -32,8 +33,7 @@ class Video(SqlAlchemyBase, UserMixin, SerializerMixin):
     likers = relationship(
         "User", secondary=likes, primaryjoin=(id == likes.c.liked_id),
         secondaryjoin=(User.id == likes.c.liker_id), backref=backref('liked', lazy='dynamic'), lazy='dynamic')
-
-    # comments = relationship("Comment", back_populates='video')
+    comments = relationship("Comment", back_populates='video', lazy='dynamic')
 
     def like(self, user):
         if not self.is_liked(user):
@@ -46,6 +46,9 @@ class Video(SqlAlchemyBase, UserMixin, SerializerMixin):
     def is_liked(self, user):
         return self.likers.filter(
             likes.c.liker_id == user.id).count() > 0
+
+    def comment(self, user, comment):
+        self.comments.append(Comment(author_id=user.id, video_id=self.id, text=comment))
 
     def __repr__(self):
         return (

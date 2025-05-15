@@ -8,9 +8,10 @@ from flask_restful import Api
 from sqlalchemy import desc
 
 from data import db_session
-from data.api import users_resources, videos_resources
+from data.api import users_resources, videos_resources, comments_resources
 from data.users import User, followers
 from data.video import Video
+from data.comments import Comment
 
 from pyffmpeg import FFmpeg
 
@@ -30,6 +31,11 @@ login_manager.login_message = "Пожалуйста, войдите в акка�
 def load_user(user_id):
     db_sess = db_session.create_session()
     return db_sess.query(User).get(user_id)
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('not_found.html', title='Не найдено', error_text='Страница не найдена', e=e)
 
 
 @app.route('/')
@@ -66,22 +72,29 @@ def video(id_video):
         return render_template('video.html', title=video.title, video=video, current_user=c_user,
                                user=video.author, videos_last=videos_last)
     else:
-        return "Видео не найдено"
+        return render_template('not_found.html', title='Не найдено', error_text='Видео не найдено')
+
+
+@app.route('/video/')
+@app.route('/video')
+@app.route('/channel')
+@app.route('/channel/')
+def page_empty():
+    return redirect(url_for('index'))
 
 
 @app.route('/channel/<int:id_user>')
 def channel(id_user):
     db_sess = db_session.create_session()
     u = db_sess.query(User).get(id_user)
-    c_user = db_sess.query(User).get(current_user.id) if current_user.is_authenticated else None
-    videos = u.videos.filter(Video.is_private == False).order_by(
-        desc(Video.id)) if u != c_user else u.videos.order_by(desc(Video.id))
-
     if u:
+        c_user = db_sess.query(User).get(current_user.id) if current_user.is_authenticated else None
+        videos = u.videos.filter(Video.is_private == False).order_by(
+            desc(Video.id)) if u != c_user else u.videos.order_by(desc(Video.id))
         return render_template('channel.html', videos=videos, followers=followers, title=u.username, user=u,
                                current_user=c_user)
     else:
-        return "Канал не найден"
+        return render_template('not_found.html', title='Не найдено', error_text='Канал не найден')
 
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -343,6 +356,9 @@ def main():
     api.add_resource(users_resources.UserChangePasswordResource, '/api/users/change_password')
     api.add_resource(videos_resources.VideoLikeResource, '/api/videos/<int:video_id>/like')
     api.add_resource(videos_resources.VideoUnlikeResource, '/api/videos/<int:video_id>/unlike')
+    api.add_resource(videos_resources.VideoResource, '/api/videos/<int:video_id>')
+    api.add_resource(videos_resources.VideosListResource, '/api/videos')
+    api.add_resource(comments_resources.CommentVideoResource, '/api/comment')
 
     if not os.path.exists(f"{app.config['UPLOAD_FOLDER']}/avatars"):
         os.makedirs(f"{app.config['UPLOAD_FOLDER']}/avatars")
