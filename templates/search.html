@@ -1,5 +1,53 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 style="padding: 1rem;">Результаты по запросу {{ search_str }}:</h1>
+<h1 style="padding: 1rem;">Результаты по запросу "{{ search_str }}":</h1>
+
+<div class="container mt-4">
+    {% if channels or videos %}
+        {% if channels %}
+        <h2>Каналы:</h2>
+        <div class="row row-cols-1 row-cols-md-4 g-4">
+            {% for channel in channels %}
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <img src="{{ channel.avatar or '/static/img/no_avatar.jpeg' }}"
+                             class="rounded-circle mb-3" width="150" height="150">
+                        <h5><a href="{{ url_for('channel', id_user=channel.id) }}">{{ channel.username }}</a></h5>
+                        <p class="text-muted">{{ channel.followers.all()|length }} подписчиков</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if videos %}
+        <h2 class="mt-4">Видео:</h2>
+        <div class="row mx-auto row-cols-auto g-4">
+            {% for video in videos %}
+            <div class="col">
+                <div class="card" style="width: 18rem;">
+                    <img class="card-img-top" src="{{ video.preview }}" alt="превью">
+                    <div class="card-body">
+                        <a href="/video/{{ video.id }}" class="stretched-link"></a>
+                        <h5 class="card-title">{{ video.title }}</h5>
+                        <p class="card-text">
+                            <a href="/channel/{{ video.author_id }}"
+                               class="stretched-link link-body-emphasis text-decoration-none"
+                               style="position: relative; z-index: 2;">{{ video.author.username }}</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% else %}
+    <div class="alert alert-info">
+        Ничего не найдено.
+    </div>
+    {% endif %}
+</div>
 {% endblock %}
