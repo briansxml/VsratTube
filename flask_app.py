@@ -44,7 +44,14 @@ def index():
 def search():
     searched = request.args.get('q')
     if searched:
-        return render_template('search.html', search_str=searched, title=searched)
+        db_sess = db_session.create_session()
+        channels = db_sess.query(User).filter(User.username.ilike(f'%{searched}%')).all()
+        videos = db_sess.query(Video).filter(
+            Video.is_private == False,
+            Video.title.ilike(f'%{searched}%')
+        ).all()
+        return render_template('search.html', search_str=searched, title=searched,
+                               channels=channels, videos=videos)
     return redirect("/")
 
 
